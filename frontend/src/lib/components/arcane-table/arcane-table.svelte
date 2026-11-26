@@ -923,7 +923,7 @@
 				role="region"
 				aria-label={m.table_scroll_region()}
 				tabindex="0"
-				class="isolate h-full min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+				class="isolate h-full min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
 			>
 				<ArcaneTableDesktopView
 					{rowIndex}
