@@ -4702,5 +4702,6 @@
   "failed_to_start_job_run": "Failed to start job run ({status})",
   "job_run_failed": "Job run failed",
   "job_run_timeout": "Job Run Timeout",
-  "job_run_timeout_description": "How long a manual Compose job run may take in seconds (default: 1800 = 30 minutes)."
+  "job_run_timeout_description": "How long a manual Compose job run may take in seconds (default: 1800 = 30 minutes).",
+  "table_scroll_region": "Table. Use arrow keys to scroll."
 }

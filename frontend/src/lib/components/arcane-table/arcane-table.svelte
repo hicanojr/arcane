@@ -913,13 +913,17 @@
 				/>
 			</div>
 		{:else if !isMobile.current}
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex (The scroll region needs keyboard focus for arrow-key scrolling.) -->
 			<div
 				{@attach (node) => restoreScroll(node, 'desktop')}
 				{@attach trackOverflow((value) => (overflow = value))}
 				bind:this={desktopScrollEl}
 				data-table-scroll="desktop"
 				data-overflow-right={overflow.right || undefined}
-				class="isolate h-full min-h-0 flex-1 overflow-auto"
+				role="region"
+				aria-label={m.table_scroll_region()}
+				tabindex="0"
+				class="isolate h-full min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
 			>
 				<ArcaneTableDesktopView
 					{rowIndex}

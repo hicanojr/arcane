@@ -239,6 +239,7 @@
 			</InputGroup.Addon>
 			<InputGroup.Input
 				placeholder={m.common_search()}
+				aria-label={m.common_search()}
 				value={(table.atoms.globalFilter.get() as string) ?? ''}
 				oninput={(e) => debouncedSetGlobal(e.currentTarget.value)}
 				onchange={(e) => table.setGlobalFilter(e.currentTarget.value)}
