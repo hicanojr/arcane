@@ -314,6 +314,12 @@ function failedJobAndRepeatedFailureItems(sources: AttentionSources): AttentionI
 	];
 }
 
+function containerExitCode(event: Event): string | undefined {
+	const value = event.metadata?.['exitCode'];
+	if (typeof value === 'string' || typeof value === 'number') return String(value);
+	return undefined;
+}
+
 function containerEventItems(events: EnvironmentEvent[], now: Temporal.Instant): AttentionItem[] {
 	const cutoff = now.subtract({ hours: CONTAINER_EVENT_WINDOW_HOURS });
 	const latest = new Map<string, EnvironmentEvent>();
@@ -328,7 +334,7 @@ function containerEventItems(events: EnvironmentEvent[], now: Temporal.Instant):
 			started.set(key, Math.max(started.get(key) ?? 0, at.epochMilliseconds));
 			continue;
 		}
-		const failedExit = event.type === 'container.die' && String(event.metadata?.['exitCode'] ?? '0') !== '0';
+		const failedExit = event.type === 'container.die' && (containerExitCode(event) ?? '0') !== '0';
 		if (failedExit) failures.set(key, (failures.get(key) ?? 0) + 1);
 		if (!failedExit && event.type !== 'container.oom') continue;
 		const existing = latest.get(key);
@@ -343,11 +349,14 @@ function containerEventItems(events: EnvironmentEvent[], now: Temporal.Instant):
 			if (startedAt <= (parseInstant(event.timestamp)?.epochMilliseconds ?? 0)) return true;
 			return (failures.get(key) ?? 0) > 1 && startedAt > quietSince;
 		})
-		.map(([key, entry]) => ({
-			key,
-			entry,
-			name: entry.event.resourceName || String(entry.event.metadata?.['name'] ?? entry.event.resourceId)
-		}));
+		.map(([key, entry]) => {
+			const metadataName = entry.event.metadata?.['name'];
+			return {
+				key,
+				entry,
+				name: entry.event.resourceName || (typeof metadataName === 'string' ? metadataName : entry.event.resourceId || '')
+			};
+		});
 	const nameCounts = new Map<string, number>();
 	for (const { entry, name } of failing) {
 		nameCounts.set(`${entry.environmentId}:${name}`, (nameCounts.get(`${entry.environmentId}:${name}`) ?? 0) + 1);
@@ -356,7 +365,7 @@ function containerEventItems(events: EnvironmentEvent[], now: Temporal.Instant):
 		const sharedName = (nameCounts.get(`${environmentId}:${displayName}`) ?? 0) > 1;
 		const name = sharedName ? m.name_with_short_id({ name: displayName, id: (event.resourceId ?? '').slice(0, 8) }) : displayName;
 		const oom = event.type === 'container.oom';
-		let title = m.name_exited_with_code({ name, code: String(event.metadata?.['exitCode'] ?? '') });
+		let title = m.name_exited_with_code({ name, code: containerExitCode(event) ?? '' });
 		if (oom) {
 			title = m.name_ran_out_of_memory({ name });
 		}
